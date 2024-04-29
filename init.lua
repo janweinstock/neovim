@@ -157,6 +157,55 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+local function cpp_build()
+  -- Define the buffer and window options
+  local width = math.ceil(vim.o.columns * 0.8) -- 80% of the screen width
+  local height = math.ceil(vim.o.lines * 0.8) -- 80% of the screen height
+  local row = math.ceil((vim.o.lines - height) / 2) -- Centered vertically
+  local col = math.ceil((vim.o.columns - width) / 2) -- Centered horizontally
+
+  -- Create a buffer
+  local buf = vim.api.nvim_create_buf(false, true) -- No listed, scratch buffer
+
+  -- Create a floating window with the buffer
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = 'editor', -- Relative to the editor
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    style = 'minimal',
+    border = 'single',
+    title = 'CMake Build',
+    title_pos = 'center',
+  })
+
+  vim.api.nvim_buf_set_keymap(buf, 'n', '<ESC>', '', {
+    noremap = true,
+    silent = true,
+    callback = function()
+      vim.api.nvim_win_close(win, true)
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end,
+  })
+
+  vim.fn.jobstart({ 'cmake', '--build', 'BUILD/DEBUG/.BUILD' }, {
+    stdout_buffered = false,
+    stderr_buffered = false,
+    on_stdout = function(_, data)
+      vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
+    end,
+    on_stderr = function(_, data)
+      vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
+    end,
+    on_exit = function(_, _)
+      vim.api.nvim_buf_set_lines(buf, -1, -1, false, { 'Build complete' })
+    end,
+  })
+end
+
+vim.keymap.set('n', 'B', cpp_build, { desc = 'Test command' })
+
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -544,6 +593,11 @@ require('lazy').setup({
             '--background-index',
             '--header-insertion=never',
           },
+        },
+
+        cmake = {
+          cmd = { 'cmake-language-server' },
+          buildDirectory = 'BUILD/DEBUG/.BUILD',
         },
 
         -- gopls = {},
