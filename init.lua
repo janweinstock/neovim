@@ -728,6 +728,12 @@ require('lazy').setup({
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
       },
+      formatters = {
+        stylua = {
+          command = 'stylua',
+          args = { '--indent-type', 'Spaces', '-' },
+        },
+      },
     },
     keys = {
       {
