@@ -1,3 +1,4 @@
+-- Downloaded from: https://github.com/LuaLS/lua-language-server/releases
 return {
   cmd = { "lua-language-server", },
   filetypes = { "lua" },
