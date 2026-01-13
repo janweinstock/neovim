@@ -8,7 +8,13 @@ vim.keymap.set("n", "<C-left>", "<C-w><C-h>", { desc = "Move focus to the left w
 vim.keymap.set("n", "<C-right>", "<C-w><C-l>", { desc = "Move focus to the right window", silent = true })
 vim.keymap.set("n", "<C-down>", "<C-w><C-j>", { desc = "Move focus to the lower window", silent = true })
 vim.keymap.set("n", "<C-up>", "<C-w><C-k>", { desc = "Move focus to the upper window", silent = true })
-vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal left toggle<CR>', { desc = "Toggle filesystem view", silent = true })
+vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal left toggle<CR>',
+    { desc = "Toggle filesystem view", silent = true })
+
+vim.keymap.set('n', '<leader>gs', ':Git status<CR>', {})
+vim.keymap.set('n', '<leader>gb', ':Git blame<CR>', {})
+vim.keymap.set('n', '<leader>gt', ':Git log --graph --oneline --all<CR>', {})
+vim.keymap.set('n', '<leader>gc', ':Git commit<CR>', {})
 
 vim.keymap.set({ "n", "v" }, "<leader>aa", "<cmd>CodeCompanionActions<cr>",
     { desc = "CodeCompanion Actions", silent = true })
