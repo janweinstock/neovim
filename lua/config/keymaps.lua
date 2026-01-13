@@ -1,13 +1,20 @@
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { silent = true })
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
-vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-vim.keymap.set("n", "<C-left>", "<C-w><C-h>", { desc = "Move focus to the left window" })
-vim.keymap.set("n", "<C-right>", "<C-w><C-l>", { desc = "Move focus to the right window" })
-vim.keymap.set("n", "<C-down>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
-vim.keymap.set("n", "<C-up>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode", silent = true })
+vim.keymap.set("n", "<C-left>", "<C-w><C-h>", { desc = "Move focus to the left window", silent = true })
+vim.keymap.set("n", "<C-right>", "<C-w><C-l>", { desc = "Move focus to the right window", silent = true })
+vim.keymap.set("n", "<C-down>", "<C-w><C-j>", { desc = "Move focus to the lower window", silent = true })
+vim.keymap.set("n", "<C-up>", "<C-w><C-k>", { desc = "Move focus to the upper window", silent = true })
+vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal left toggle<CR>', { desc = "Toggle filesystem view", silent = true })
+
+vim.keymap.set({ "n", "v" }, "<leader>aa", "<cmd>CodeCompanionActions<cr>",
+    { desc = "CodeCompanion Actions", silent = true })
+vim.keymap.set({ "n", "v" }, "<leader>ai", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Prompt", silent = true })
+vim.keymap.set("n", "<C-a>", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "CodeCompanion Chat Toggle", silent = true })
+vim.cmd("cnoreabbrev ai CodeCompanion")
 
 vim.api.nvim_create_autocmd("TextYankPost", {
     desc = "Highlight when yanking (copying) text",
@@ -40,15 +47,57 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
         local client = vim.lsp.get_client_by_id(event.data.client_id)
         if client and client.server_capabilities.documentHighlightProvider then
+            local highlight_augroup = vim.api.nvim_create_augroup("group-lsp-highlight", { clear = false })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
                 buffer = event.buf,
+                group = highlight_augroup,
                 callback = vim.lsp.buf.document_highlight,
             })
 
             vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
                 buffer = event.buf,
+                group = highlight_augroup,
                 callback = vim.lsp.buf.clear_references,
             })
+
+            vim.api.nvim_create_autocmd("LspDetach", {
+                group = vim.api.nvim_create_augroup("group-lsp-detach", { clear = true }),
+                callback = function(event2)
+                    vim.lsp.buf.clear_references()
+                    vim.api.nvim_clear_autocmds { group = "group-lsp-highlight", buffer = event2.buf }
+                end,
+            })
+        end
+    end,
+})
+
+
+local cc_fidgets = {}
+local cc_group = vim.api.nvim_create_augroup("CodeCompanionFidget", {})
+
+vim.api.nvim_create_autocmd("User", {
+    desc = "Starts a fidget when an AI request is started",
+    pattern = "CodeCompanionRequestStarted",
+    group = cc_group,
+    callback = function(event)
+        cc_fidgets[event.data.id] = require("fidget.progress").handle.create({
+            title = "CodeCompanion",
+            message = "Thinking...",
+            lsp_client = { name = event.data.adapter.formatted_name },
+        })
+    end,
+})
+
+vim.api.nvim_create_autocmd("User", {
+    desc = "Ends a fidget when an AI request finishes",
+    pattern = "CodeCompanionRequestFinished",
+    group = cc_group,
+    callback = function(event)
+        local fidget = cc_fidgets[event.data.id]
+        if fidget then
+            fidget.message = event.data.status == "success" and "Done" or "Failed"
+            fidget:finish()
+            cc_fidgets[event.data.id] = nil
         end
     end,
 })

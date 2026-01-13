@@ -24,6 +24,7 @@ return {
             sources = {
                 { name = "nvim_lsp" },
                 { name = "path" },
+                { name = "codecompanion" },
             },
         })
     end,

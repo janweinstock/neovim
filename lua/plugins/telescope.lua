@@ -10,12 +10,10 @@ return {
 
   config = function()
     require('telescope').setup({
-      extennions = {
-        ['ui-select'] = { require('telescope.themes').get_dropdown() },
+      extensions = {
+        ['ui-select'] = require('telescope.themes').get_dropdown(),
       }
     })
-
-    require('telescope').load_extension('ui-select')
 
     pcall(require('telescope').load_extension, 'fzf')
     pcall(require('telescope').load_extension, 'ui-select')
