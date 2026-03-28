@@ -5,15 +5,46 @@ return {
         { "j-hui/fidget.nvim" },
         { "nvim-lua/plenary.nvim" },
         { "nvim-treesitter/nvim-treesitter", lazy = false, build = ":TSUpdate" },
+        { "nvim-telescope/telescope.nvim" },
     },
 
     config = function()
-        -- local mod = "gemini-2.5-pro"
-        local model = "gemini-2.5-flash"
         require("codecompanion").setup({
-            interactions = {
-                chat = { adapter = "gemini", model = model },
-                inline = { adapter = "gemini", model = model },
+            strategies = {
+                chat = { adapter = "gemini" },
+                inline = { adapter = "gemini" },
+                agent = {
+                    adapter = "gemini",
+                    tools = { "cmd_runner", "editor", "rg" },
+                },
+            },
+            display = {
+                action_palette = {
+                    width = 95,
+                    height = 10,
+                    prompt = "Prompt ",
+                    provider = "telescope",
+                    opts = {
+                        show_default_actions = true,
+                        show_default_prompt_library = true,
+                    },
+                },
+                chat = {
+                    window = {
+                        layout = "float",
+                    },
+                },
+            },
+            adapters = {
+                gemini = function()
+                    return require("codecompanion.adapters").extend("gemini", {
+                        schema = {
+                            model = {
+                                default = "gemini-2.5-flash",
+                            },
+                        },
+                    })
+                end,
             },
             opts = {
                 log_level = "DEBUG",
