@@ -1,5 +1,6 @@
 return {
     "olimorris/codecompanion.nvim",
+    version = "v19.9.0",
 
     dependencies = {
         { "j-hui/fidget.nvim" },
@@ -19,16 +20,24 @@ return {
     },
 
     config = function()
-        local default_adapter = "gemini"
-        local default_model = "gemini-2.5-flash"
+        local default_adapter = "copilot"
         require("codecompanion").setup({
             interactions = {
-                chat = { adapter = default_adapter, model = default_model },
-                inline = { adapter = default_adapter, model = default_model },
+                chat = { adapter = default_adapter },
+                inline = { adapter = default_adapter },
                 agent = {
                     adapter = default_adapter,
-                    model = default_model,
                     tools = { "cmd_runner", "editor", "rg" },
+                },
+            },
+            adapters = {
+                http = {
+                    copilot = function()
+                        return require("codecompanion.adapters").extend("copilot", {
+                            schema = {
+                                model = { default = "claude-sonnet-4.6", }, },
+                        })
+                    end,
                 },
             },
             display = {
@@ -48,28 +57,7 @@ return {
                     },
                 },
             },
-            adapters = {
-                http = {
-                    gemini = function()
-                        return require("codecompanion.adapters").extend("gemini", {
-                            schema = {
-                                model = {
-                                    default = "gemini-2.5-flash",
-                                },
-                            },
-                        })
-                    end,
-                    copilot = function()
-                        return require("codecompanion.adapters").extend("copilot", {
-                            schema = {
-                                model = {
-                                    default = "gpt-5.3",
-                                },
-                            },
-                        })
-                    end,
-                },
-            },
+
             opts = {
                 log_level = "DEBUG",
             },
