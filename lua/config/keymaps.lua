@@ -33,6 +33,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.api.nvim_create_autocmd("LspAttach", {
     group = vim.api.nvim_create_augroup("group-lsp-attach", { clear = true }),
     callback = function(event)
+        if vim.bo[event.buf].buftype ~= "" then return end
         local mkkey = function(keys, func, desc)
             vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
         end
