@@ -11,6 +11,10 @@ vim.keymap.set("n", "<C-left>", "<C-w><C-h>", { desc = "Move focus to the left w
 vim.keymap.set("n", "<C-right>", "<C-w><C-l>", { desc = "Move focus to the right window", silent = true })
 vim.keymap.set("n", "<C-down>", "<C-w><C-j>", { desc = "Move focus to the lower window", silent = true })
 vim.keymap.set("n", "<C-up>", "<C-w><C-k>", { desc = "Move focus to the upper window", silent = true })
+vim.keymap.set("t", "<C-left>", "<Cmd>wincmd h<CR>", { desc = "Move focus to the left window", silent = true })
+vim.keymap.set("t", "<C-right>", "<Cmd>wincmd l<CR>", { desc = "Move focus to the right window", silent = true })
+vim.keymap.set("t", "<C-down>", "<Cmd>wincmd j<CR>", { desc = "Move focus to the lower window", silent = true })
+vim.keymap.set("t", "<C-up>", "<Cmd>wincmd k<CR>", { desc = "Move focus to the upper window", silent = true })
 vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal left toggle<CR>',
     { desc = "Toggle filesystem view", silent = true })
 
