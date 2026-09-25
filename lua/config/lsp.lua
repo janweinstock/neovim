@@ -9,6 +9,9 @@ vim.lsp.enable({
     "lua_ls",
     "clangd",
     "neocmake",
+    "pyright",
+    "tsgo",
+    "rust_analyzer",
 })
 
 vim.diagnostic.config({
