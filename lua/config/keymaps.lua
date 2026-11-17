@@ -15,6 +15,20 @@ vim.keymap.set("t", "<C-left>", "<Cmd>wincmd h<CR>", { desc = "Move focus to the
 vim.keymap.set("t", "<C-right>", "<Cmd>wincmd l<CR>", { desc = "Move focus to the right window", silent = true })
 vim.keymap.set("t", "<C-down>", "<Cmd>wincmd j<CR>", { desc = "Move focus to the lower window", silent = true })
 vim.keymap.set("t", "<C-up>", "<Cmd>wincmd k<CR>", { desc = "Move focus to the upper window", silent = true })
+
+-- Resize the current window by pushing its border in the arrow's direction.
+-- The right/bottom border is moved if there is one, otherwise the left/top.
+local function resize_window(dir)
+    local horizontal = dir == "h" or dir == "l"
+    local has_far_neighbor = vim.fn.winnr(horizontal and "l" or "j") ~= vim.fn.winnr()
+    local grow = (dir == "l" or dir == "j") == has_far_neighbor
+    local amount = (horizontal and 4 or 2) * vim.v.count1
+    vim.cmd((horizontal and "vertical " or "") .. "resize " .. (grow and "+" or "-") .. amount)
+end
+for key, dir in pairs({ left = "h", right = "l", down = "j", up = "k" }) do
+    vim.keymap.set({ "n", "t" }, "<C-S-" .. key .. ">", function() resize_window(dir) end,
+        { desc = "Resize window: move border " .. key, silent = true })
+end
 vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal left toggle<CR>',
     { desc = "Toggle filesystem view", silent = true })
 
