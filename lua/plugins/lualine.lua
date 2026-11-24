@@ -75,6 +75,21 @@ local function level_color(key)
   end
 end
 
+-- Each window has its own statusline, so narrow splits need to drop things.
+local function wider_than(cols)
+  return function()
+    return vim.api.nvim_win_get_width(0) >= cols
+  end
+end
+
+-- Encoding / fileformat / filetype say nothing useful about a terminal buffer
+-- (e.g. "snacks_terminal") and only eat space there.
+local function file_info(cols)
+  return function()
+    return vim.bo.buftype ~= "terminal" and vim.api.nvim_win_get_width(0) >= cols
+  end
+end
+
 return {
   "nvim-lualine/lualine.nvim",
   dependencies = {
@@ -88,11 +103,11 @@ return {
       },
       sections = {
         lualine_x = {
-          { cpu, color = level_color("cpu") },
-          { mem, color = level_color("mem") },
-          "encoding",
-          "fileformat",
-          "filetype",
+          { cpu, color = level_color("cpu"), cond = wider_than(40) },
+          { mem, color = level_color("mem"), cond = wider_than(40) },
+          { "encoding", cond = file_info(100) },
+          { "fileformat", cond = file_info(100) },
+          { "filetype", cond = file_info(0) },
         },
       },
     })
